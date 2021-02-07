@@ -64,7 +64,7 @@ namespace ifd {
 			std::wstring Path;
 			bool IsDirectory;
 			size_t Size;
-			long DateModified;
+			time_t DateModified;
 
 			bool HasIconPreview;
 			void* IconPreview;
