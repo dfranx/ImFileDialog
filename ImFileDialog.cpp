@@ -1,3 +1,6 @@
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #include "ImFileDialog.h"
 
 #include <fstream>
@@ -38,7 +41,7 @@ namespace ifd {
 		int opened = window->StateStorage.GetInt(id, 0);
 		ImVec2 pos = window->DC.CursorPos;
 		const bool is_mouse_x_over_arrow = (g.IO.MousePos.x >= pos.x && g.IO.MousePos.x < pos.x + g.FontSize);
-		if (ImGui::InvisibleButton(label, ImVec2(-1, g.FontSize + g.Style.FramePadding.y * 2)))
+		if (ImGui::InvisibleButton(label, ImVec2(-FLT_MIN, g.FontSize + g.Style.FramePadding.y * 2)))
 		{
 			if (is_mouse_x_over_arrow) {
 				int* p_opened = window->StateStorage.GetIntRef(id, 0);
@@ -74,7 +77,7 @@ namespace ifd {
 
 		ImU32 id = window->GetID(label);
 		ImVec2 pos = window->DC.CursorPos;
-		bool ret = ImGui::InvisibleButton(label, ImVec2(-1, g.FontSize + g.Style.FramePadding.y * 2));
+		bool ret = ImGui::InvisibleButton(label, ImVec2(-FLT_MIN, g.FontSize + g.Style.FramePadding.y * 2));
 
 		bool hovered = ImGui::IsItemHovered();
 		bool active = ImGui::IsItemActive();
@@ -139,7 +142,7 @@ namespace ifd {
 
 				totalWidth += ImGui::CalcTextSize(sectionStr.c_str()).x + style.FramePadding.x * 2.0f;
 				btnList.push_back(sectionStr);
-				indices.push_back(path.size());
+				indices.push_back((int)path.size());
 			}
 
 			// UI buttons
@@ -261,7 +264,7 @@ namespace ifd {
 		// outline
 		window->DrawList->PathClear();
 		for (int i = 0; i < numPoints * 2; i++) {
-			int radius = i & 1 ? innerRadius : outerRadius;
+			float radius = i & 1 ? innerRadius : outerRadius;
 			window->DrawList->PathLineTo(ImVec2(center.x + radius * sin(i * angle), center.y - radius * cos(i * angle)));
 		}
 		window->DrawList->PathStroke(ImGui::ColorConvertFloat4ToU32(ImGui::GetStyle().Colors[ImGuiCol_Text]), true, 2.0f);
@@ -1030,17 +1033,20 @@ namespace ifd {
 
 		// table view
 		if (m_zoom == 1.0f) {
-			if (ImGui::BeginTable("##contentTable", 3, ImGuiTableFlags_ScrollFreezeTopRow | ImGuiTableFlags_Resizable | ImGuiTableFlags_Sortable, ImVec2(0, -1))) {
+			if (ImGui::BeginTable("##contentTable", 3, /*ImGuiTableFlags_Resizable |*/ ImGuiTableFlags_Sortable, ImVec2(0, -FLT_MIN))) {
 				// header
-				ImGui::TableSetupColumn("Name##filename", ImGuiTableColumnFlags_WidthStretch, -1, 0);
-				ImGui::TableSetupColumn("Date modified##filedate", ImGuiTableColumnFlags_WidthAlwaysAutoResize, -1, 1);
-				ImGui::TableSetupColumn("Size##filesize", ImGuiTableColumnFlags_WidthAlwaysAutoResize, -1, 2);
-				ImGui::TableAutoHeaders();
+				ImGui::TableSetupColumn("Name##filename", ImGuiTableColumnFlags_WidthStretch, 0.0f, 0);
+				ImGui::TableSetupColumn("Date modified##filedate", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 0.0f, 1);
+				ImGui::TableSetupColumn("Size##filesize", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 0.0f, 2);
+                ImGui::TableSetupScrollFreeze(0, 1);
+				ImGui::TableHeadersRow();
 
 				// sort
-				if (const ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-					if (sortSpecs->SpecsChanged)
+				if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
+                    if (sortSpecs->SpecsDirty) {
+                        sortSpecs->SpecsDirty = false;
 						m_sortContent(sortSpecs->Specs->ColumnUserID, sortSpecs->Specs->SortDirection);
+                    }
 				}
 
 				// content
@@ -1255,7 +1261,7 @@ namespace ifd {
 		ImGui::SameLine();
 		ImGui::PopStyleColor();
 
-		if (ImGui::InputTextEx("##searchTB", "Search", m_searchBuffer, 128, ImVec2(-1, GUI_ELEMENT_SIZE), 0)) // TODO: no hardcoded literals
+		if (ImGui::InputTextEx("##searchTB", "Search", m_searchBuffer, 128, ImVec2(-FLT_MIN, GUI_ELEMENT_SIZE), 0)) // TODO: no hardcoded literals
 			m_setDirectory(m_currentDirectory, false); // refresh
 
 
@@ -1295,7 +1301,7 @@ namespace ifd {
 		/***** BOTTOM BAR *****/
 		ImGui::Text("File name:");
 		ImGui::SameLine();
-		if (ImGui::InputTextEx("##file_input", "Filename", m_inputTextbox, 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250 : -1, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (ImGui::InputTextEx("##file_input", "Filename", m_inputTextbox, 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
 			std::string filename(m_inputTextbox);
 			bool success = m_finalize(std::wstring(filename.begin(), filename.end()));
 #ifdef _WIN32
@@ -1305,10 +1311,9 @@ namespace ifd {
 		}
 		if (m_type != IFD_DIALOG_DIRECTORY) {
 			ImGui::SameLine();
-			ImGui::PushItemWidth(-1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
 			if (ImGui::Combo("##ext_combo", &m_filterSelection, m_filter.c_str()))
 				m_setDirectory(m_currentDirectory, false); // refresh
-			ImGui::PopItemWidth();
 		}
 
 		// buttons
@@ -1324,7 +1329,7 @@ namespace ifd {
 #endif
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(-1, 0.0f)))
+		if (ImGui::Button("Cancel", ImVec2(-FLT_MIN, 0.0f)))
 			m_finalize();
 	}
 }

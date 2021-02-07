@@ -5,6 +5,7 @@
 #include <thread>
 #include <functional>
 #include <unordered_map>
+#include <algorithm> // std::min, std::max
 
 #define IFD_DIALOG_FILE			0
 #define IFD_DIALOG_DIRECTORY	1
