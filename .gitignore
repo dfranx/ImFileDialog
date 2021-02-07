@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# ImFileDialog
+*.cmake
+Makefile
+imgui.ini
+ImFileDialogExample
+CMakeCache.txt
+CMakeFiles

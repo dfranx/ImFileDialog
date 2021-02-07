@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 		return (void*)tex;
 	};
 	ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
-		GLuint texID = (GLuint)tex;
+		GLuint texID = (GLuint)((uintptr_t)tex);
 		glDeleteTextures(1, &texID);
 	};
 

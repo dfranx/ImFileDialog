@@ -8,13 +8,16 @@
 #include <imgui/imgui_internal.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb/stb_image.h>
 
 #ifdef _WIN32
 #include <Windows.h>
 #include <shellapi.h>
 #include <Lmcons.h>
 #pragma comment(lib, "Shell32.lib")
+#else
+#include <unistd.h>
+#include <pwd.h>
 #endif
 
 #define ICON_SIZE ImGui::GetFont()->FontSize + 3
@@ -389,7 +392,37 @@ namespace ifd {
 				thisPC->Children.push_back(new FileTreeNode(std::wstring(1, 'A' + i) + L":"));
 		m_treeCache.push_back(thisPC);
 #else
+		std::error_code ec;
 
+		// Quick Access
+		struct passwd *pw;
+		uid_t uid;
+		uid = geteuid();
+		pw = getpwuid(uid);
+		if (pw) {
+			std::string username(pw->pw_name);
+			std::wstring homePath = L"/home/" + std::wstring(username.begin(), username.end());
+			
+			if (std::filesystem::exists(homePath, ec))
+				quickAccess->Children.push_back(new FileTreeNode(homePath));
+			if (std::filesystem::exists(homePath + L"/Desktop", ec))
+				quickAccess->Children.push_back(new FileTreeNode(homePath + L"/Desktop"));
+			if (std::filesystem::exists(homePath + L"/Documents", ec))
+				quickAccess->Children.push_back(new FileTreeNode(homePath + L"/Documents"));
+			if (std::filesystem::exists(homePath + L"/Downloads", ec))
+				quickAccess->Children.push_back(new FileTreeNode(homePath + L"/Downloads"));
+			if (std::filesystem::exists(homePath + L"/Pictures", ec))
+				quickAccess->Children.push_back(new FileTreeNode(homePath + L"/Pictures"));
+		}
+
+		// This PC
+		FileTreeNode* thisPC = new FileTreeNode(L"This PC");
+		thisPC->Read = true;
+		for (const auto& entry : std::filesystem::directory_iterator("/", ec)) {
+			if (std::filesystem::is_directory(entry, ec))
+				thisPC->Children.push_back(new FileTreeNode(entry.path().wstring()));
+		}
+		m_treeCache.push_back(thisPC);
 #endif
 	}
 	FileDialog::~FileDialog() {
@@ -733,7 +766,7 @@ namespace ifd {
 
 		// delete textures
 		for (auto& icon : m_icons) {
-			unsigned int ptr = (unsigned int)icon.second;
+			unsigned int ptr = (unsigned int)((uintptr_t)icon.second);
 			if (std::count(deletedIcons.begin(), deletedIcons.end(), ptr)) // skip duplicates
 				continue;
 
@@ -849,7 +882,6 @@ namespace ifd {
 						m_content.push_back(FileData(c->Path));
 			}
 		} 
-#ifdef _WIN32
 		else if (p == L"This PC") {
 			for (auto& node : m_treeCache) {
 				if (node->Path == p)
@@ -857,7 +889,6 @@ namespace ifd {
 						m_content.push_back(FileData(c->Path));
 			}
 		}
-#endif
 		else {
 			bool isDrive = m_currentDirectory.size() == 2 && m_currentDirectory[1] == ':';
 			std::error_code ec;
@@ -1207,7 +1238,7 @@ namespace ifd {
 		
 		if (ImGui::ArrowButtonEx("##up", ImGuiDir_Up, ImVec2(GUI_ELEMENT_SIZE, GUI_ELEMENT_SIZE))) {
 			if (std::filesystem::path(m_currentDirectory).has_parent_path())
-				m_setDirectory(std::filesystem::path(m_currentDirectory).parent_path());
+				m_setDirectory(std::filesystem::path(m_currentDirectory).parent_path().wstring());
 		}
 		
 		std::wstring curDirCopy = m_currentDirectory;
@@ -1299,7 +1330,7 @@ namespace ifd {
 }
 
 
-static const int file_icon[] = {
+static const unsigned int file_icon[] = {
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x4c000000, 0xf5000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xdd000000, 0x2d000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0xff000000, 0xd1000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6a000000, 0xa1000000, 0xff000000, 0xff000000, 0x2e000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0xff000000, 0x54000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x46000000, 0xf5000000, 0xe0000000, 0xff000000, 0x30000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
@@ -1333,7 +1364,7 @@ static const int file_icon[] = {
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0xff000000, 0xd2000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0x6b000000, 0xd2000000, 0xff000000, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x4c000000, 0xf5000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xf5000000, 0x4b000000, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
 };
-static const int folder_icon[] = {
+static const unsigned int folder_icon[] = {
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
  0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
  0x00000000, 0x00000000, 0x45000000, 0x8a000000, 0x99000000, 0x97000000, 0x97000000, 0x97000000, 0x97000000, 0x97000000, 0x98000000, 0x81000000, 0x35000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
