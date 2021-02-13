@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 		// Simple window
 		ImGui::Begin("Control Panel");
 		if (ImGui::Button("Open file"))
-			ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Open a shader", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*");
+			ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Open a shader", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*", true);
 		if (ImGui::Button("Open directory"))
 			ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
 		if (ImGui::Button("Save file"))
@@ -120,22 +120,23 @@ int main(int argc, char* argv[])
 		// file dialogs
 		if (ifd::FileDialog::Instance().IsDone("ShaderOpenDialog")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
-				const std::wstring& res = ifd::FileDialog::Instance().GetResult();
-				printf("OPEN[%s]\n", std::string(res.begin(), res.end()).c_str());
+				const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+				for (const auto& r : res) // ShaderOpenDialog supports multiselection
+					printf("OPEN[%s]\n", r.u8string().c_str());
 			}
 			ifd::FileDialog::Instance().Close();
 		}
 		if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
-				const std::wstring& res = ifd::FileDialog::Instance().GetResult();
-				printf("DIRECTORY[%s]\n", std::string(res.begin(), res.end()).c_str());
+				std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+				printf("DIRECTORY[%s]\n", res.c_str());
 			}
 			ifd::FileDialog::Instance().Close();
 		}
 		if (ifd::FileDialog::Instance().IsDone("ShaderSaveDialog")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
-				const std::wstring& res = ifd::FileDialog::Instance().GetResult();
-				printf("SAVE[%s]\n", std::string(res.begin(), res.end()).c_str());
+				std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+				printf("SAVE[%s]\n", res.c_str());
 			}
 			ifd::FileDialog::Instance().Close();
 		}

@@ -26,12 +26,13 @@ namespace ifd {
 
 		bool Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir = "");
 
-		bool Open(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir = "");
+		bool Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect = false, const std::string& startingDir = "");
 
 		bool IsDone(const std::string& key);
 
 		inline bool HasResult() { return m_result.size(); }
 		inline const std::filesystem::path& GetResult() { return m_result[0]; }
+		inline const std::vector<std::filesystem::path>& GetResults() { return m_result; }
 
 		void Close();
 
@@ -78,6 +79,7 @@ namespace ifd {
 		std::string m_currentKey;
 		std::string m_currentTitle;
 		std::filesystem::path m_currentDirectory;
+		bool m_isMultiselect;
 		bool m_isOpen;
 		uint8_t m_type;
 		char m_inputTextbox[1024];
@@ -87,9 +89,11 @@ namespace ifd {
 		std::vector<std::string> m_favorites;
 		bool m_calledOpenPopup;
 		std::stack<std::filesystem::path> m_backHistory, m_forwardHistory;
-		int m_selectedFileItem;
-
 		float m_zoom;
+
+		std::vector<std::filesystem::path> m_selections;
+		int m_selectedFileItem;
+		void m_select(const std::filesystem::path& path, bool isCtrlDown = false);
 
 		std::vector<std::filesystem::path> m_result;
 		bool m_finalize(const std::string& filename = "");
