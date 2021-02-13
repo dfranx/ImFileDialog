@@ -133,6 +133,7 @@ namespace ifd {
 
 			// UI buttons
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, ImGui::GetStyle().ItemSpacing.y));
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			bool isFirstElement = true;
 			for (int i = 0; i < btnList.size(); i++) {
 				if (totalWidth > size.x - 30 && i != btnList.size() - 1) { // trim some buttons if there's not enough space
@@ -168,7 +169,7 @@ namespace ifd {
 
 				isFirstElement = false;
 			}
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 
 
 			// click state
