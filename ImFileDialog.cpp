@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <sys/stat.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -325,9 +326,12 @@ namespace ifd {
 	FileDialog::FileData::FileData(const std::filesystem::path& path) {
 		std::error_code ec;
 		Path = path;
-		DateModified = std::chrono::time_point_cast<std::chrono::seconds>(std::filesystem::last_write_time(path, ec)).time_since_epoch().count();
 		IsDirectory = std::filesystem::is_directory(path, ec);
 		Size = std::filesystem::file_size(path, ec);
+
+		struct stat attr;
+		stat(path.u8string().c_str(), &attr);
+		DateModified = attr.st_ctime;
 
 		HasIconPreview = false;
 		IconPreview = nullptr;
@@ -1137,7 +1141,7 @@ namespace ifd {
 					ImGui::TableSetColumnIndex(1);
 					auto tm = std::localtime(&entry.DateModified);
 					if (tm != nullptr)
-						ImGui::Text("%d/%d/%d %02d:%02d", tm->tm_mon + 1, tm->tm_mday, 1900 - 369 + tm->tm_year, tm->tm_hour, tm->tm_min); // idk why the year is wrong (have to -369)
+						ImGui::Text("%d/%d/%d %02d:%02d", tm->tm_mon + 1, tm->tm_mday, 1900 + tm->tm_year, tm->tm_hour, tm->tm_min);
 					else ImGui::Text("---");
 
 					// size
