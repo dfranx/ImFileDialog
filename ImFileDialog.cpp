@@ -909,6 +909,12 @@ namespace ifd {
 			m_backHistory.push(m_currentDirectory);
 
 		m_currentDirectory = p;
+#ifdef _WIN32
+		// drives don't work well without the backslash symbol
+		if (p.u8string().size() == 2 && p.u8string()[1] == ':')
+			m_currentDirectory = std::filesystem::u8path(p.u8string() + "\\");
+#endif
+
 		m_clearIconPreview();
 		m_content.clear(); // p == "" after this line, due to reference
 		m_selectedFileItem = -1;
