@@ -369,33 +369,33 @@ namespace ifd {
 		m_treeCache.push_back(quickAccess);
 
 #ifdef _WIN32
-		char username[UNLEN + 1] = { 0 };
+		wchar_t username[UNLEN + 1] = { 0 };
 		DWORD username_len = UNLEN + 1;
-		GetUserNameA(username, &username_len);
+		GetUserNameW(username, &username_len);
 
-		std::string userPath = "C:\\Users\\" + std::string(username) + "\\";
+		std::wstring userPath = L"C:\\Users\\" + std::wstring(username) + L"\\";
 
 		// Quick Access / Bookmarks
-		quickAccess->Children.push_back(new FileTreeNode(userPath + "Desktop"));
-		quickAccess->Children.push_back(new FileTreeNode(userPath + "Documents"));
-		quickAccess->Children.push_back(new FileTreeNode(userPath + "Downloads"));
-		quickAccess->Children.push_back(new FileTreeNode(userPath + "Pictures"));
+		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Desktop"));
+		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Documents"));
+		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Downloads"));
+		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Pictures"));
 
 		// OneDrive
-		FileTreeNode* oneDrive = new FileTreeNode(userPath + "OneDrive");
+		FileTreeNode* oneDrive = new FileTreeNode(userPath + L"OneDrive");
 		m_treeCache.push_back(oneDrive);
 
 		// This PC
 		FileTreeNode* thisPC = new FileTreeNode("This PC");
 		thisPC->Read = true;
-		if (std::filesystem::exists(userPath + "3D Objects"))
-			thisPC->Children.push_back(new FileTreeNode(userPath + "3D Objects"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + "Desktop"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + "Documents"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + "Downloads"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + "Music"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + "Pictures"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + "Videos"));
+		if (std::filesystem::exists(userPath + L"3D Objects"))
+			thisPC->Children.push_back(new FileTreeNode(userPath + L"3D Objects"));
+		thisPC->Children.push_back(new FileTreeNode(userPath + L"Desktop"));
+		thisPC->Children.push_back(new FileTreeNode(userPath + L"Documents"));
+		thisPC->Children.push_back(new FileTreeNode(userPath + L"Downloads"));
+		thisPC->Children.push_back(new FileTreeNode(userPath + L"Music"));
+		thisPC->Children.push_back(new FileTreeNode(userPath + L"Pictures"));
+		thisPC->Children.push_back(new FileTreeNode(userPath + L"Videos"));
 		DWORD d = GetLogicalDrives();
 		for (int i = 0; i < 26; i++)
 			if (d & (1 << i))
