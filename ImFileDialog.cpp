@@ -14,9 +14,9 @@
 #include "stb_image.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #include <shellapi.h>
-#include <Lmcons.h>
+#include <lmcons.h>
 #pragma comment(lib, "Shell32.lib")
 #else
 #include <unistd.h>
