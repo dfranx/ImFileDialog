@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
 		glDeleteTextures(1, &texID);
 	};
 
+    int record_type = 0; // 0 = images, 1 = video
 	SDL_Event event;
 	while (run) {
 		while (SDL_PollEvent(&event)) {
@@ -107,12 +108,33 @@ int main(int argc, char* argv[])
 		ImGui_ImplSDL2_NewFrame(wnd);
 		ImGui::NewFrame();
 
+        // define a callback to extend ImFileDialog with radio button
+        // options to choose between capturing still images and videos
+        auto cb = [&record_type](bool get_size)
+        {
+            static bool sameline = true;
+            if (get_size)
+            {
+                auto &st = ImGui::GetStyle();
+                return sameline ? 0.f : (ImGui::GetFontSize() + st.FramePadding.y + st.ItemSpacing.y * 2.f);
+            }
+
+            ImGui::Checkbox("Same line", &sameline);
+            ImGui::SameLine();
+            ImGui::RadioButton("Images", &record_type, 0);
+            ImGui::SameLine();
+            ImGui::RadioButton("Video", &record_type, 1);
+            if (sameline)
+                ImGui::SameLine();  // same line as OK/Cancel buttons
+            return 0.f;
+        };
+
 		// Simple window
 		ImGui::Begin("Control Panel");
 		if (ImGui::Button("Open file"))
 			ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Open a shader", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*", true);
 		if (ImGui::Button("Open directory"))
-			ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
+			ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "", false, "", cb);
 		if (ImGui::Button("Save file"))
 			ifd::FileDialog::Instance().Save("ShaderSaveDialog", "Save a shader", "*.sprj {.sprj}");
 		ImGui::End();
@@ -129,7 +151,7 @@ int main(int argc, char* argv[])
 		if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
 				std::string res = ifd::FileDialog::Instance().GetResult().u8string();
-				printf("DIRECTORY[%s]\n", res.c_str());
+				printf("DIRECTORY[%s] (for %s)\n", res.c_str(), record_type ? "video" : "images");
 			}
 			ifd::FileDialog::Instance().Close();
 		}

@@ -27,7 +27,7 @@ namespace ifd {
 
 		bool Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir = "");
 
-		bool Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect = false, const std::string& startingDir = "");
+		bool Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect = false, const std::string& startingDir = "", std::function<float(bool)> cb = nullptr);
 
 		bool IsDone(const std::string& key);
 
@@ -137,5 +137,10 @@ namespace ifd {
 
 		void m_renderPopups();
 		void m_renderFileDialog();
+
+        // customize dialog with user-provided widgets (between filename text box and Open/Save/Cancel buttons)
+        // param: true -> just return the additional required height
+        //        false -> submit user widgets (return value ignored)
+		std::function<float(bool)> m_cb;
 	};
 }
