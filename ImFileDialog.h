@@ -138,7 +138,4 @@ namespace ifd {
 		void m_renderPopups();
 		void m_renderFileDialog();
 	};
-
-	static const char* GetDefaultFolderIcon();
-	static const char* GetDefaultFileIcon();
 }
