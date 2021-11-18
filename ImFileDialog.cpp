@@ -1399,8 +1399,12 @@ namespace ifd {
 #endif
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(-FLT_MIN, 0.0f)))
-			m_finalize();
+		if (ImGui::Button("Cancel", ImVec2(-FLT_MIN, 0.0f))) {
+			if (m_type == IFD_DIALOG_DIRECTORY)
+				m_isOpen = false;
+			else
+				m_finalize();
+		}
 	}
 }
 
