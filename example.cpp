@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
-#include <imgui/imgui.h>
-#include <imgui/examples/imgui_impl_sdl.h>
-#include <imgui/examples/imgui_impl_opengl3.h>
+#include <imgui.h>
+#include <backends/imgui_impl_sdl.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <time.h>
 
 #ifdef _WIN32

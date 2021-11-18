@@ -10,8 +10,9 @@ set(SOURCES
 	libs/imgui/imgui.cpp
 	libs/imgui/imgui_widgets.cpp
 	libs/imgui/imgui_draw.cpp
-	libs/imgui/examples/imgui_impl_opengl3.cpp
-	libs/imgui/examples/imgui_impl_sdl.cpp
+	libs/imgui/imgui_tables.cpp
+	libs/imgui/backends/imgui_impl_opengl3.cpp
+	libs/imgui/backends/imgui_impl_sdl.cpp
 )
 
 # cmake toolchain
@@ -50,7 +51,7 @@ set_target_properties(ImFileDialogExample PROPERTIES
 
 # include directories
 target_include_directories(ImFileDialogExample PRIVATE ${SDL2_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS})
-target_include_directories(ImFileDialogExample PRIVATE libs/)
+target_include_directories(ImFileDialogExample PRIVATE libs libs/imgui)
 
 # link libraries
 target_link_libraries(ImFileDialogExample ${OPENGL_LIBRARIES})
