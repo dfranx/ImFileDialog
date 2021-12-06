@@ -29,6 +29,9 @@
 #define PI 3.141592f
 
 namespace ifd {
+	static const char* GetDefaultFolderIcon();
+	static const char* GetDefaultFileIcon();
+
 	/* UI CONTROLS */
 	bool FolderNode(const char* label, ImTextureID icon, bool& clicked)
 	{
@@ -75,7 +78,7 @@ namespace ifd {
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = g.CurrentWindow;
 
-		ImU32 id = window->GetID(label);
+		//ImU32 id = window->GetID(label);
 		ImVec2 pos = window->DC.CursorPos;
 		bool ret = ImGui::InvisibleButton(label, ImVec2(-FLT_MIN, g.FontSize + g.Style.FramePadding.y * 2));
 
@@ -136,14 +139,14 @@ namespace ifd {
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, ImGui::GetStyle().ItemSpacing.y));
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			bool isFirstElement = true;
-			for (int i = 0; i < btnList.size(); i++) {
+			for (size_t i = 0; i < btnList.size(); i++) {
 				if (totalWidth > size.x - 30 && i != btnList.size() - 1) { // trim some buttons if there's not enough space
 					float elSize = ImGui::CalcTextSize(btnList[i].c_str()).x + style.FramePadding.x * 2.0f + GUI_ELEMENT_SIZE;
 					totalWidth -= elSize;
 					continue;
 				}
 
-				ImGui::PushID(i);
+				ImGui::PushID(static_cast<int>(i));
 				if (!isFirstElement) {
 					ImGui::ArrowButtonEx("##dir_dropdown", ImGuiDir_Right, ImVec2(GUI_ELEMENT_SIZE, GUI_ELEMENT_SIZE));
 					anyOtherHC |= ImGui::IsItemHovered() | ImGui::IsItemClicked();
@@ -155,7 +158,7 @@ namespace ifd {
 #else
 					std::string newPath = "/";
 #endif
-					for (int j = 0; j <= i; j++) {
+					for (size_t j = 0; j <= i; j++) {
 						newPath += btnList[j];
 #ifdef _WIN32
 						if (j != i)
@@ -541,7 +544,7 @@ namespace ifd {
 		// remove from sidebar
 		for (auto& p : m_treeCache)
 			if (p->Path == "Quick Access") {
-				for (int i = 0; i < p->Children.size(); i++)
+				for (size_t i = 0; i < p->Children.size(); i++)
 					if (p->Children[i]->Path == path) {
 						p->Children.erase(p->Children.begin() + i);
 						break;
@@ -657,9 +660,9 @@ namespace ifd {
 
 		std::vector<std::string> exts;
 
-		int lastSplit = 0, lastExt = 0;
+		size_t lastSplit = 0, lastExt = 0;
 		bool inExtList = false;
-		for (int i = 0; i < filter.size(); i++) {
+		for (size_t i = 0; i < filter.size(); i++) {
 			if (filter[i] == ',') {
 				if (!inExtList)
 					lastSplit = i + 1;
@@ -873,7 +876,7 @@ namespace ifd {
 	}
 	void FileDialog::m_loadPreview()
 	{
-		for (int i = 0; m_previewLoaderRunning && i < m_content.size(); i++) {
+		for (size_t i = 0; m_previewLoaderRunning && i < m_content.size(); i++) {
 			auto& data = m_content[i];
 
 			if (data.HasIconPreview)
@@ -1007,7 +1010,7 @@ namespace ifd {
 
 		if (m_content.size() > 0) {
 			// find where the file list starts
-			int fileIndex = 0;
+			size_t fileIndex = 0;
 			for (; fileIndex < m_content.size(); fileIndex++)
 				if (!m_content[fileIndex].IsDirectory)
 					break;
@@ -1215,7 +1218,7 @@ namespace ifd {
 		if (openNewDirectoryDlg)
 			ImGui::OpenPopup("Enter directory name##newdir");
 		if (ImGui::BeginPopupModal("Are you sure?##delete")) {
-			if (m_selectedFileItem >= m_content.size() || m_content.size() == 0)
+			if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
 				ImGui::CloseCurrentPopup();
 			else {
 				const FileData& data = m_content[m_selectedFileItem];
@@ -1366,13 +1369,18 @@ namespace ifd {
 #ifdef _WIN32
 			if (!success)
 				MessageBeep(MB_ICONERROR);
+#else
+			(void)success;
 #endif
 		}
 		if (m_type != IFD_DIALOG_DIRECTORY) {
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::Combo("##ext_combo", &m_filterSelection, m_filter.c_str()))
+			int sel = static_cast<int>(m_filterSelection);
+			if (ImGui::Combo("##ext_combo", &sel, m_filter.c_str())) {
+				m_filterSelection = static_cast<size_t>(sel);
 				m_setDirectory(m_currentDirectory, false); // refresh
+			}
 		}
 
 		// buttons
@@ -1385,6 +1393,8 @@ namespace ifd {
 #ifdef _WIN32
 			if (!success)
 				MessageBeep(MB_ICONERROR);
+#else
+			(void)success;
 #endif
 		}
 		ImGui::SameLine();

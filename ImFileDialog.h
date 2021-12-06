@@ -108,7 +108,7 @@ namespace ifd {
 
 		std::string m_filter;
 		std::vector<std::vector<std::string>> m_filterExtensions;
-		int m_filterSelection;
+		size_t m_filterSelection;
 		void m_parseFilter(const std::string& filter);
 
 		std::vector<int> m_iconIndices;
@@ -138,7 +138,4 @@ namespace ifd {
 		void m_renderPopups();
 		void m_renderFileDialog();
 	};
-
-	static const char* GetDefaultFolderIcon();
-	static const char* GetDefaultFileIcon();
 }
