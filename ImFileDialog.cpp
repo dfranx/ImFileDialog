@@ -28,6 +28,10 @@
 #define DEFAULT_ICON_SIZE 32
 #define PI 3.141592f
 
+static char tolowerc( char value )
+{
+	return (char)::tolower( value );
+}
 namespace ifd {
 	static const char* GetDefaultFolderIcon();
 	static const char* GetDefaultFileIcon();
@@ -969,8 +973,8 @@ namespace ifd {
 
 						std::string filenameSearch = filename;
 						std::string query(m_searchBuffer);
-						std::transform(filenameSearch.begin(), filenameSearch.end(), filenameSearch.begin(), ::tolower);
-						std::transform(query.begin(), query.end(), query.begin(), ::tolower);
+						std::transform(filenameSearch.begin(), filenameSearch.end(), filenameSearch.begin(), ::tolowerc);
+						std::transform(query.begin(), query.end(), query.begin(), ::tolowerc);
 
 						if (filenameSearch.find(query, 0) == std::string::npos)
 							continue;
@@ -1022,8 +1026,8 @@ namespace ifd {
 					std::string lName = left.Path.u8string();
 					std::string rName = right.Path.u8string();
 
-					std::transform(lName.begin(), lName.end(), lName.begin(), ::tolower);
-					std::transform(rName.begin(), rName.end(), rName.begin(), ::tolower);
+					std::transform(lName.begin(), lName.end(), lName.begin(), ::tolowerc);
+					std::transform(rName.begin(), rName.end(), rName.begin(), ::tolowerc);
 
 					int comp = lName.compare(rName);
 
@@ -1117,7 +1121,7 @@ namespace ifd {
 					if (filename.size() == 0)
 						filename = entry.Path.u8string(); // drive
 					
-					bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
+					bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path) > 0;
 
 					ImGui::TableNextRow();
 
@@ -1174,7 +1178,7 @@ namespace ifd {
 				if (filename.size() == 0)
 					filename = entry.Path.u8string(); // drive
 
-				bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
+				bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path) > 0;
 
 				if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path), ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
 					std::error_code ec;
@@ -1315,7 +1319,7 @@ namespace ifd {
 			m_setDirectory(curDirCopy);
 		ImGui::SameLine();
 		
-		if (FavoriteButton("##dirfav", std::count(m_favorites.begin(), m_favorites.end(), m_currentDirectory.u8string()))) {
+		if (FavoriteButton("##dirfav", std::count(m_favorites.begin(), m_favorites.end(), m_currentDirectory.u8string()) > 0)) {
 			if (std::count(m_favorites.begin(), m_favorites.end(), m_currentDirectory.u8string()))
 				RemoveFavorite(m_currentDirectory.u8string());
 			else 
