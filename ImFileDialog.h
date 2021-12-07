@@ -31,7 +31,7 @@ namespace ifd {
 
 		bool IsDone(const std::string& key);
 
-		inline bool HasResult() { return m_result.size(); }
+		inline bool HasResult() { return m_result.size() > 0; }
 		inline const std::filesystem::path& GetResult() { return m_result[0]; }
 		inline const std::vector<std::filesystem::path>& GetResults() { return m_result; }
 
