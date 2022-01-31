@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 #include <functional>
+#undef concat
 #include <filesystem>
 #include <unordered_map>
 #include <algorithm> // std::min, std::max
@@ -60,7 +61,7 @@ namespace ifd {
 #endif
 
 			FileTreeNode(const std::string& path) {
-				Path = std::filesystem::u8path(path);
+				Path = std::filesystem::path(path);
 				Read = false;
 			}
 
