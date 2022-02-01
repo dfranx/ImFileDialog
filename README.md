@@ -48,7 +48,7 @@ if (ImGui::Button("Open a texture"))
 ```c++
 if (ifd::FileDialog::Instance().IsDone("TextureOpenDialog")) {
 	if (ifd::FileDialog::Instance().HasResult()) {
-		std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+		std::string res = ifd::FileDialog::Instance().GetResult().string();
 		printf("OPEN[%s]\n", res.c_str());
 	}
 	ifd::FileDialog::Instance().Close();
