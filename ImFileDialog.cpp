@@ -413,8 +413,11 @@ namespace ifd {
 		uid = geteuid();
 		pw = getpwuid(uid);
 		if (pw) {
+#ifdef __APPLE__
+			std::string homePath = "/Users/" + std::string(pw->pw_name);
+#else
 			std::string homePath = "/home/" + std::string(pw->pw_name);
-			
+#endif
 			if (std::filesystem::exists(homePath, ec))
 				quickAccess->Children.push_back(new FileTreeNode(homePath));
 			if (std::filesystem::exists(homePath + "/Desktop", ec))
