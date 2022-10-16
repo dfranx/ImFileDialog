@@ -840,7 +840,7 @@ namespace ifd {
 	}
 	void FileDialog::m_refreshIconPreview()
 	{
-		if (m_zoom >= 5.0f) {
+		if (m_zoom >= 3.0f) {
 			if (m_previewLoader == nullptr) {
 				m_previewLoaderRunning = true;
 				m_previewLoader = new std::thread(&FileDialog::m_loadPreview, this);
@@ -1386,7 +1386,31 @@ namespace ifd {
 			}
 		}
 
-		// buttons
+		// zoom
+		{
+			bool changed = false;
+			int zoom_int = (int)m_zoom;
+			changed |= ImGui::RadioButton("Details", & zoom_int, 1);
+			ImGui::SameLine();
+			changed |= ImGui::RadioButton("Icons", & zoom_int, 2);
+			ImGui::SameLine();
+			changed |= ImGui::RadioButton("Preview", & zoom_int, 3);
+			ImGui::SameLine();
+			if (zoom_int >= 3)
+			{
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(75.f);
+				changed |= ImGui::SliderInt("##Zoom", &zoom_int, 3, 30, "");
+			}
+			if (changed)
+			{
+				m_zoom = (float) zoom_int;
+				m_refreshIconPreview();
+			}
+			ImGui::SameLine();
+		}
+
+        // buttons
 		float ok_cancel_width = GUI_ELEMENT_SIZE * 7;
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ok_cancel_width);
 		if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? "Save" : "Open", ImVec2(ok_cancel_width / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f))) {
