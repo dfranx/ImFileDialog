@@ -939,16 +939,16 @@ namespace ifd {
 			m_clearIcons();
 		}
 
-		if (p.u8string() == "Quick Access") {
+		if (m_currentDirectory.u8string() == "Quick Access") {
 			for (auto& node : m_treeCache) {
-				if (node->Path == p)
+				if (node->Path == m_currentDirectory)
 					for (auto& c : node->Children)
 						m_content.push_back(FileData(c->Path));
 			}
 		} 
-		else if (p.u8string() == "This PC") {
+		else if (m_currentDirectory.u8string() == "This PC") {
 			for (auto& node : m_treeCache) {
-				if (node->Path == p)
+				if (node->Path == m_currentDirectory)
 					for (auto& c : node->Children)
 						m_content.push_back(FileData(c->Path));
 			}
