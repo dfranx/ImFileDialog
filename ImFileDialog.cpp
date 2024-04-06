@@ -1406,10 +1406,9 @@ namespace ifd {
 				m_finalize();
 		}
 
-		int escapeKey = ImGui::GetIO().KeyMap[ImGuiKey_Escape];
-		if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
-			 escapeKey >= 0 && ImGui::IsKeyPressed(escapeKey))
-			m_isOpen = false;
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
+             ImGuiKey_Escape >= 0 && ImGui::IsKeyPressed(ImGuiKey_Escape))
+            m_isOpen = false;
 	}
 }
 
