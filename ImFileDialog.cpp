@@ -470,7 +470,7 @@ namespace ifd {
 
 		return true;
 	}
-	bool FileDialog::Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect, const std::string& startingDir)
+	bool FileDialog::Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect, const std::string& startingDir, std::function<float(bool)> cb)
 	{
 		if (!m_currentKey.empty())
 			return false;
@@ -485,6 +485,7 @@ namespace ifd {
 		m_selectedFileItem = -1;
 		m_isMultiselect = isMultiselect;
 		m_type = filter.empty() ? IFD_DIALOG_DIRECTORY : IFD_DIALOG_FILE;
+		m_cb = std::move(cb);
 
 		m_parseFilter(filter);
 		if (!startingDir.empty())
@@ -1332,6 +1333,8 @@ namespace ifd {
 
 		/***** CONTENT *****/
 		float bottomBarHeight = (GImGui->FontSize + ImGui::GetStyle().FramePadding.y + ImGui::GetStyle().ItemSpacing.y * 2.0f) * 2;
+		if (m_cb)
+			bottomBarHeight += m_cb(true);	// query additional height due to user customizations
 		if (ImGui::BeginTable("##table", 2, ImGuiTableFlags_Resizable, ImVec2(0, -bottomBarHeight))) {
 			ImGui::TableSetupColumn("##tree", ImGuiTableColumnFlags_WidthFixed, 125.0f);
 			ImGui::TableSetupColumn("##content", ImGuiTableColumnFlags_WidthStretch);
@@ -1383,6 +1386,10 @@ namespace ifd {
 				m_setDirectory(m_currentDirectory, false); // refresh
 			}
 		}
+
+		// user's additional widgets
+		if (m_cb)
+			m_cb(false);
 
 		// buttons
 		float ok_cancel_width = GUI_ELEMENT_SIZE * 7;
